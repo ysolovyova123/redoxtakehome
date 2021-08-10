@@ -11,13 +11,15 @@
 		"start-dev": "npm run start-server & npm run build-watch"
 	},
 	"repository": {
-    "type": "git",
-    "url": "git+https://github.com/ysolovyova123/redoxtakehome.git"
-  },
+		"type": "git",
+		"url": "git+https://github.com/ysolovyova123/redoxtakehome.git"
+	},
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
 		"express": "^4.17.1",
+		"material-ui": "^0.20.2",
+		"@material-ui/core": "^4.11.2",
 		"morgan": "^1.10.0",
 		"pg": "^8.3.3",
 		"react": "^16.13.1",
