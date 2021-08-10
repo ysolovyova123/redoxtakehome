@@ -3,4 +3,3 @@ import ReactDOM from "react-dom"
 import App from "./components/App"
 
 ReactDOM.render(<App />, document.querySelector('#main'))
-//make sure "root" is right or change it

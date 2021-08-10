@@ -2,16 +2,17 @@ import React from "react"
 import Grid from '@material-ui/core/Grid'
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
-import { Button } from '@material-ui/core';
-import PRsContainer from './PRsContainer'
 
 export default class App extends React.Component {
 	constructor(props) {
 		super(props)
 		this.state = {
+			page: 0,
 			prState: '',
 			prCount: '',
-			prs: []
+			prsSample: [],
+			fullPrs: [],
+			prevPrStateQueried: null
 		}
 		this.setStateOfPR = this.setStateOfPR.bind(this)
 		this.generateCount = this.generateCount.bind(this)
@@ -31,42 +32,56 @@ export default class App extends React.Component {
 			}
     }
 	}
-	async getResults(prState) {
+
+	async getResults(prState, page = 0) {
 		let url
 		if (prState === '') {
-			url = `https://api.github.com/search/issues?q=org:ramda+is:pr&per_page=100`
+				url = `https://api.github.com/search/issues?q=org:ramda+is:pr&per_page=100&page=${page + 1}`
 		}
 		else {
-			url = `https://api.github.com/search/issues?q=org:ramda+is:pr+state:${this.state.prState}&per_page=100`
+				url = `https://api.github.com/search/issues?q=org:ramda+is:pr+state:${this.state.prState}&per_page=100&page=${page + 1}`
 		}
-		// let response = await axios.get(url)
-		let response = await fetch(url)
-		// console.log('RESPONSE')
-		// console.log(response)
+		let response = await fetch(url,{
+			headers: {
+					'Authorization': 'token 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'
+			}
+		})
 		let results = await response.json()
-		// console.log('RESULT')
-		// console.log(results)
-		// console.log('FIRST RESULT DATE IS')
-		// console.log(results.items[0].created_at)
-		// console.log('NOW WITH TEXT TRIMMED')
-		// console.log(results.items[0].created_at.substring(0,10))
-		// console.log('COUNT')
-		// console.log(results.total_count)
-		return results
+		// if it's the first page of results (current page is 0), set total count and sample of first 100 results in the state
+		if (page === 0) {
+			this.setState({
+				prCount: results.total_count,
+				prsSample: results.items
+			})
+		}
+		// if you are switching between PR states (open -> closed), clear the array storing ALL the PRs with that state
+		if (this.state.prevPrStateQueried !== null && prState !== this.state.prevPrStateQueried) {
+			this.setState({
+				fullPrs: []
+			})
+		}
+		// update prevPrStateQueried to what you have selected (e.g. only open PRs)
+		this.setState({
+			prevPrStateQueried: prState
+		})
+		// because the API only shows you 100 results max per page, add those results to your full array and keep going (new page)
+		for (let i=0; i<results.items.length; i++) {
+			this.state.fullPrs.push(results.items[i])
+		}
+		page++
+		// the GitHub Search API provides up to 1,000 results for each search, hence needing to stop once we hit 10 pages of 100 results each (meaning we have stored 1,000 results)
+		// Source for API limitation: https://docs.github.com/en/rest/reference/search
+		if (Math.ceil(this.state.prCount / 100) <= page || page === 10) return
+		// if this limit has not been hit, keep going through remaining pages and store those results
+		this.getResults(prState, page)
 	}
 
 	async generateCount (e) {
 		e.preventDefault()
-		console.log('button clicked')
 		let {prState} = this.state
-		let finalResults = await this.getResults(prState)
-		this.setState({
-			prCount: finalResults.total_count,
-			prs: finalResults.items
-		})
-		// console.log('COUNT IS NOW IN STATE: ', this.state.prCount)
-		// console.log('RESULTS ARE NOW IN STATE: ', this.state.prs)
+		await this.getResults(prState)
 	}
+
 	render () {
 	return (
 		<div id = "mainContainer">
@@ -90,11 +105,10 @@ export default class App extends React.Component {
 			<h2>Pull Request Count: {this.state.prCount}</h2>
 			<div id="prsSample">
 				<h4>Sample PRs (first 100 results)</h4>
-				{/* <PRsContainer /> */}
 				<div id="prsContainer">
-					{this.state.prs.map(pr => {return (
+					{this.state.prsSample.map(pr => {return (
 					<div id="singlePR" key={pr.id}>
-						<b>{pr.title}</b>
+						<a href= {pr.pull_request.html_url}>{pr.title}</a>
 						<br />
 						Created at: {pr.created_at.substring(0,10)}
 						<br />
@@ -105,7 +119,6 @@ export default class App extends React.Component {
 				</div>
 			</div>
 		</div>
-
 	)
 	}
 }
