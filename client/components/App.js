@@ -43,7 +43,7 @@ export default class App extends React.Component {
 		}
 		let response = await fetch(url,{
 			headers: {
-					'Authorization': 'token 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'
+					'Authorization': 'TOKEN GOES HERE'
 			}
 		})
 		let results = await response.json()
