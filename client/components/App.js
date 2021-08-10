@@ -69,7 +69,7 @@ export default class App extends React.Component {
 	}
 	render () {
 	return (
-		<div id = "landing">
+		<div id = "mainContainer">
 			<h1>Ramda Organization Pull Requests</h1>
 			<Grid>
 				<TextField
@@ -86,8 +86,8 @@ export default class App extends React.Component {
 				</TextField>
 			</Grid>
 			<br></br>
-			<Button className="generatePRCountButton" variant="contained" color="secondary" onClick={this.generateCount}>Generate PR Count</Button>
-			<h2>Total Count: {this.state.prCount}</h2>
+			<button className="generatePRCountButton" onClick={this.generateCount}>Generate PR Count</button>
+			<h2>Pull Request Count: {this.state.prCount}</h2>
 			<div id="prsSample">
 				<h4>Sample PRs (first 100 results)</h4>
 				{/* <PRsContainer /> */}
