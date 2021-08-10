@@ -65,7 +65,7 @@ export default class App extends React.Component {
 			<h1>Ramda Pull Requests</h1>
 			<Grid>
 				<TextField
-					select label="State of PR"
+					select label="State of PR (Default: All)"
 					id="State"
 					name="State"
 					//required
